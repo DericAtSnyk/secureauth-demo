@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data/
+*.log
+.DS_Store
+
+# NOTE: .env is intentionally NOT ignored — it contains planted demo secrets for Snyk scanning

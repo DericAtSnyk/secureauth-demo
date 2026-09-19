@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secureauth-demo
+  labels:
+    app: secureauth-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: secureauth-demo
+  template:
+    metadata:
+      labels:
+        app: secureauth-demo
+    spec:
+      # HIGH: hostNetwork exposes pod on host network stack
+      hostNetwork: true
+
+      containers:
+        - name: secureauth-demo
+          # LOW: image pinned to :latest
+          image: secureauth-demo:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 3000
+
+          # CRITICAL: running as root with privileged mode, no securityContext hardening
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            runAsNonRoot: false
+            allowPrivilegeEscalation: true
+
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: secureauth-config
+                  key: JWT_SECRET
+            - name: SESSION_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: secureauth-config
+                  key: SESSION_SECRET
+            - name: DB_CONNECTION_STRING
+              valueFrom:
+                configMapKeyRef:
+                  name: secureauth-config
+                  key: DB_CONNECTION_STRING
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: secureauth-config
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: secureauth-config
+                  key: AWS_SECRET_ACCESS_KEY
+
+          # HIGH: hostPath volume mount
+          volumeMounts:
+            - name: host-docker-socket
+              mountPath: /var/run/docker.sock
+            - name: host-etc
+              mountPath: /host-etc
+              readOnly: false
+
+          # LOW: no resource requests or limits
+          # resources: {}
+
+      volumes:
+        - name: host-docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+        - name: host-etc
+          hostPath:
+            path: /etc
+            type: Directory

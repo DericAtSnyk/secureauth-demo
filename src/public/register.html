@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — SecureAuth Demo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Create Account</h1>
+    <form id="registerForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="displayName">Display Name</label>
+      <input type="text" id="displayName" name="displayName">
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required minlength="6">
+
+      <button type="submit">Register</button>
+    </form>
+    <p id="message"></p>
+    <p><a href="/">Back</a> · <a href="/login.html">Already have an account?</a></p>
+  </div>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+          displayName: document.getElementById('displayName').value,
+        }),
+      });
+      const data = await res.json();
+      const msg = document.getElementById('message');
+      if (res.ok) {
+        msg.textContent = 'Account created! You can now log in.';
+        msg.className = 'success';
+      } else {
+        msg.textContent = data.error || 'Registration failed';
+        msg.className = 'error';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset — SecureAuth Demo</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Password Reset</h1>
+
+    <section>
+      <h2>Step 1: Request Token</h2>
+      <form id="requestForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+        <button type="submit">Request Reset</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Step 2: Confirm Reset</h2>
+      <form id="confirmForm">
+        <label for="token">Reset Token</label>
+        <input type="text" id="token" required>
+
+        <label for="newPassword">New Password</label>
+        <input type="password" id="newPassword" required minlength="6">
+
+        <button type="submit">Reset Password</button>
+      </form>
+    </section>
+
+    <p id="message"></p>
+    <p><a href="/">Back</a></p>
+  </div>
+  <script>
+    document.getElementById('requestForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/password-reset/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: document.getElementById('email').value }),
+      });
+      const data = await res.json();
+      const msg = document.getElementById('message');
+      msg.textContent = data.message + (data.token ? ` Token: ${data.token}` : '');
+      msg.className = 'success';
+      if (data.token) document.getElementById('token').value = data.token;
+    });
+
+    document.getElementById('confirmForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/password-reset/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: document.getElementById('token').value,
+          newPassword: document.getElementById('newPassword').value,
+        }),
+      });
+      const data = await res.json();
+      const msg = document.getElementById('message');
+      msg.textContent = data.message || data.error;
+      msg.className = res.ok ? 'success' : 'error';
+    });
+  </script>
+</body>
+</html>
