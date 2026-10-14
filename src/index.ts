@@ -13,6 +13,7 @@ import profileRoutes from './routes/profile';
 import adminRoutes from './routes/admin';
 import passwordResetRoutes from './routes/password-reset';
 import preferencesRoutes from './routes/preferences';
+import userDirectoryRoutes from './routes/user-directory';
 
 dotenv.config();
 
@@ -51,6 +52,7 @@ app.use(profileRoutes);
 app.use(adminRoutes);
 app.use(passwordResetRoutes);
 app.use(preferencesRoutes);
+app.use(userDirectoryRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'secureauth-demo' });
